@@ -21,13 +21,19 @@ class BurgerBuilder extends Component {
     totalPrice: 4,
     purchasable: false,
     purchasing: false,
-    loading: false
+    loading: false,
+    error: false
   };
 
   componentDidMount() {
-    axios.get("/ingredients.json").then(response => {
-      this.setState({ ingredients: response.data });
-    });
+    axios
+      .get("/ingredients.json")
+      .then(response => {
+        this.setState({ ingredients: response.data });
+      })
+      .catch(error => {
+        this.setState({ error: true });
+      });
   }
 
   updatePurchaseState(ingredients) {
@@ -86,25 +92,25 @@ class BurgerBuilder extends Component {
 
   purchaseContinueHandler = () => {
     //alert('You continued');
-    this.setState({ loading: true });
-    const order = {
-      ingredients: this.state.ingredients,
-      price: this.state.totalPrice,
-      customer: {
-        name: "Simeon Tomov",
-        address: {
-          street: "ala bala portokala 5",
-          postCode: 478963
-        },
-        email: "pe6o@pe6o.com"
-      },
-      delivery: "normal"
-    };
-
-    axios
-      .post("/orders.json", order)
-      .then(response => this.setState({ loading: false, purchasing: false }))
-      .catch(err => this.setState({ loading: false, purchasing: false }));
+    // this.setState({ loading: true });
+    // const order = {
+    //   ingredients: this.state.ingredients,
+    //   price: this.state.totalPrice,
+    //   customer: {
+    //     name: "Simeon Tomov",
+    //     address: {
+    //       street: "ala bala portokala 5",
+    //       postCode: 478963
+    //     },
+    //     email: "pe6o@pe6o.com"
+    //   },
+    //   delivery: "normal"
+    // };
+    // axios
+    //   .post("/orders.json", order)
+    //   .then(response => this.setState({ loading: false, purchasing: false }))
+    //   .catch(err => this.setState({ loading: false, purchasing: false }));
+    this.props.history.push("/checkout");
   };
 
   render() {
@@ -117,7 +123,11 @@ class BurgerBuilder extends Component {
     }
 
     let orderSummary = <Spinner />;
-    let burger = <Spinner />;
+    let burger = this.state.error ? (
+      <p>Ingredients could not be loaded...</p>
+    ) : (
+      <Spinner />
+    );
 
     if (this.state.ingredients) {
       burger = (
